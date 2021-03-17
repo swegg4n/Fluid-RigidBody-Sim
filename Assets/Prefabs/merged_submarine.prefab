@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 1753988629303588661}
   - component: {fileID: 1753988629303588651}
   m_Layer: 0
-  m_Name: submarine_merged
+  m_Name: merged_submarine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28,7 +28,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1483375929223531128}
-  m_LocalRotation: {x: -0.000000081460335, y: 0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -92,7 +92,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1483375929223531128}
   serializedVersion: 2
-  m_Mass: 150000
+  m_Mass: 130000
   m_Drag: 0
   m_AngularDrag: 0
   m_UseGravity: 0
@@ -126,6 +126,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6493a432cdf0de74f873fbcc1dea694c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sampleCount: 2000
+  sampleCount: 1000
   viscosity: 1
   debug: 1
