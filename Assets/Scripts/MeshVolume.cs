@@ -3,6 +3,18 @@ using UnityEngine;
 
 public static class MeshVolume
 {
+    public static float VolumeOfMesh(Mesh[] _meshes, Transform[] _transforms)
+    {
+        float totalVolume = 0;
+
+        for (int i = 0; i < _meshes.Length; i++)
+        {
+            totalVolume += VolumeOfMesh(_meshes[i], _transforms[i]);
+        }
+
+        return totalVolume;
+    }
+
     public static float VolumeOfMesh(Mesh _mesh, Transform _transform)
     {
         float volume = 0;

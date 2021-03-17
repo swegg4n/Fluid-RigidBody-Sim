@@ -3,10 +3,11 @@ using UnityEngine;
 
 public class SamplePoint
 {
-    public SamplePoint(Vector3 localPosition, Quaternion localRotation)
+    public SamplePoint(Vector3 localPosition, Quaternion localRotation, Transform linkedTransform)
     {
         this.localPosition = localPosition;
         this.localRotation = localRotation;
+        this.linkedTransform = linkedTransform;
     }
 
     private Vector3 localPosition;
@@ -15,8 +16,10 @@ public class SamplePoint
     public Vector3 GlobalPosition { get; private set; }
     public Vector3? LastPosition { get; set; }
 
+    private Transform linkedTransform;
 
-    public void SetPosition(Transform linkedTransform)
+
+    public void SetPosition()
     {
         Matrix4x4 m = Matrix4x4.Rotate(linkedTransform.rotation * Quaternion.Inverse(localRotation));
         Vector3 rotatedOffset = m.MultiplyPoint3x4(localPosition);
@@ -28,8 +31,7 @@ public class SamplePoint
 
 public class MeshSampler
 {
-    private MeshRenderer meshRenderer;
-    Transform transform;
+    private MeshRenderer[] meshRenderers;
 
     private Vector3 boundsPos;
     private Vector3 boundsSize;
@@ -39,30 +41,34 @@ public class MeshSampler
 
 
 
-    public MeshSampler(MeshRenderer meshRenderer, Transform linkedTransform, int sampleCount)
+    public MeshSampler(MeshRenderer[] meshRenderers, Transform[] linkedTransforms, int[] sampleCount_distribution)
     {
-        this.meshRenderer = meshRenderer;
-        this.transform = linkedTransform;
+        this.meshRenderers = meshRenderers;
 
-        MeshApproximation = new MeshApproximation(linkedTransform, sampleCount);
+        MeshApproximation = new MeshApproximation(sampleCount_distribution);
 
-        SampleMesh(sampleCount);
+        SampleMesh(sampleCount_distribution, linkedTransforms);
     }
 
-    private void SampleMesh(int sampleCount)
+    private void SampleMesh(int[] sampleCount_distribution, Transform[] linkedTransforms)
     {
-        boundsPos = meshRenderer.bounds.center;
-        boundsSize = new Vector3(meshRenderer.bounds.size.x, meshRenderer.bounds.size.y, meshRenderer.bounds.size.z);
-
-        int loopCap = 10000;
-        while (MeshApproximation.Samples.Count < sampleCount && --loopCap > 0)
+        for (int i = 0; i < sampleCount_distribution.Length; i++)
         {
-            Vector3 sample_pos = new Vector3(Random.Range(0, boundsSize.x), Random.Range(0, boundsSize.y), Random.Range(0, boundsSize.z)) + (boundsPos - boundsSize / 2);
+            boundsPos = meshRenderers[i].bounds.center;
+            boundsSize = new Vector3(meshRenderers[i].bounds.size.x, meshRenderers[i].bounds.size.y, meshRenderers[i].bounds.size.z);
 
-            if (ValidateSample(sample_pos))
+            int loopCap = 10000;
+            int j = 0;
+            while (j < sampleCount_distribution[i] && --loopCap > 0)
             {
-                SamplePoint sample = new SamplePoint(sample_pos - transform.position, transform.rotation);
-                MeshApproximation.Samples.Add(sample);
+                Vector3 sample_pos = new Vector3(Random.Range(0, boundsSize.x), Random.Range(0, boundsSize.y), Random.Range(0, boundsSize.z)) + (boundsPos - boundsSize / 2);
+
+                if (ValidateSample(sample_pos))
+                {
+                    SamplePoint sample = new SamplePoint(sample_pos - linkedTransforms[i].position, linkedTransforms[i].rotation, linkedTransforms[i]);
+                    MeshApproximation.Samples.Add(sample);
+                    ++j;
+                }
             }
         }
     }

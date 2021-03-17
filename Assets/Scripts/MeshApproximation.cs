@@ -1,25 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class MeshApproximation
 {
-    private Transform linkedTransform;
-
     public List<SamplePoint> Samples { get; private set; }
     public List<SamplePoint> UnderWaterSamples { get; private set; }
 
     public int SampleCount { get; private set; }
 
 
-    public MeshApproximation(Transform linkedTransform, int sampleCount)
+    public MeshApproximation(int[] sampleCounts)
     {
-        this.linkedTransform = linkedTransform;
-
         this.Samples = new List<SamplePoint>();
         this.UnderWaterSamples = new List<SamplePoint>();
 
-        this.SampleCount = sampleCount;
+        this.SampleCount = sampleCounts.Sum();
     }
 
     public void Update()
@@ -32,7 +29,7 @@ public class MeshApproximation
     {
         foreach (SamplePoint sp in Samples)
         {
-            sp.SetPosition(linkedTransform);
+            sp.SetPosition();
         }
     }
     private void UpdateUnderWaterSamples()
