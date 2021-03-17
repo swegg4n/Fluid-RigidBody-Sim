@@ -5,18 +5,18 @@ using UnityEngine;
 
 public class MeshApproximation
 {
-    public List<SamplePoint> Samples { get; private set; }
-    public List<SamplePoint> UnderWaterSamples { get; private set; }
+    public SamplePoint[] Samples { get; private set; }
+    public int[] IsUnderWater { get; private set; }
 
     public int SampleCount { get; private set; }
 
 
     public MeshApproximation(int[] sampleCounts)
     {
-        this.Samples = new List<SamplePoint>();
-        this.UnderWaterSamples = new List<SamplePoint>();
-
         this.SampleCount = sampleCounts.Sum();
+
+        this.Samples = new SamplePoint[SampleCount];
+        this.IsUnderWater = new int[SampleCount];
     }
 
     public void Update()
@@ -34,32 +34,34 @@ public class MeshApproximation
     }
     private void UpdateUnderWaterSamples()
     {
-        UnderWaterSamples.Clear();
-        foreach (SamplePoint sp in Samples)
+        for (int i = 0; i < SampleCount; i++)
         {
-            if (sp.GlobalPosition.y <= WaveManager.instance.GetWaveHeight(sp.GlobalPosition))
-            {
-                UnderWaterSamples.Add(sp);
-            }
+            IsUnderWater[i] = (Samples[i].GlobalPosition.y <= WaveManager.instance.GetWaveHeight(Samples[i].GlobalPosition)) ? 1 : 0;
         }
     }
-
 
     public Vector3 AverageSamplePosition()
     {
         Vector3 avg = Vector3.zero;
 
         foreach (SamplePoint sp in Samples)
+        {
             avg += sp.GlobalPosition / SampleCount;
+        }
 
         return avg;
     }
-    public Vector3 AverageSamplePosition(ICollection samplePoints)
+    public Vector3 AverageUnderWaterSamplePosition()
     {
         Vector3 avg = Vector3.zero;
 
-        foreach (SamplePoint sp in samplePoints)
-            avg += sp.GlobalPosition / samplePoints.Count;
+        for (int i = 0; i < SampleCount; i++)
+        {
+            if (IsUnderWater[i] == 1)
+            {
+                avg += Samples[i].GlobalPosition / SampleCount;
+            }
+        }
 
         return avg;
     }

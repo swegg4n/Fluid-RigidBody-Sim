@@ -924,6 +924,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: submarine_merged
       objectReference: {fileID: 0}
+    - target: {fileID: 1483375929223531128, guid: 3358dc1695cbb20419f0140e5e2ed16c, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2296222424121446594, guid: 3358dc1695cbb20419f0140e5e2ed16c, type: 3}
       propertyPath: m_RootOrder
       value: 3
@@ -1024,6 +1028,10 @@ PrefabInstance:
     - target: {fileID: 7970376632590847514, guid: 1b24d6bc560ca1741a3007ed5b69d8cb, type: 3}
       propertyPath: m_Name
       value: submarine
+      objectReference: {fileID: 0}
+    - target: {fileID: 7970376632590847514, guid: 1b24d6bc560ca1741a3007ed5b69d8cb, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1b24d6bc560ca1741a3007ed5b69d8cb, type: 3}

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using static Density_enum;
 
@@ -21,16 +22,15 @@ public class Buoyancy : IPhysicsComponent
 
     public void Update()
     {
-        List<SamplePoint> underWaterSamples = ms.MeshApproximation.UnderWaterSamples;
+        float underWaterSamples = (float)ms.MeshApproximation.IsUnderWater.Sum();
 
-        if (underWaterSamples.Count > 0)
+        if (underWaterSamples > 0)
         {
-            Vector3 avgUnderWaterCenter = ms.MeshApproximation.AverageSamplePosition(underWaterSamples);
-            float underWaterRatio = (float)underWaterSamples.Count / ms.MeshApproximation.SampleCount;
+            float underWaterRatio = underWaterSamples / ms.MeshApproximation.SampleCount;
             float approxUnderwaterVolume = meshVolume * underWaterRatio;
 
             Vector3 buoyantForce = -(int)Material_Density.Water * Physics.gravity * approxUnderwaterVolume;
-            rb.AddForceAtPosition(buoyantForce, avgUnderWaterCenter);
+            rb.AddForceAtPosition(buoyantForce, ms.MeshApproximation.AverageUnderWaterSamplePosition());
         }
     }
 
@@ -38,9 +38,13 @@ public class Buoyancy : IPhysicsComponent
     public void DebugDraw()
     {
         Gizmos.color = Color.blue;
-        foreach (var sample in ms.MeshApproximation.UnderWaterSamples)
+        for (int i = 0; i < ms.MeshApproximation.SampleCount; i++)
         {
-            Gizmos.DrawSphere(sample.GlobalPosition, 0.1f);
+            if (ms.MeshApproximation.IsUnderWater[i] == 1)
+            {
+                Gizmos.DrawSphere(ms.MeshApproximation.Samples[i].GlobalPosition, 0.1f);
+            }
         }
     }
+
 }

@@ -19,9 +19,11 @@ public class WaterDrag : IPhysicsComponent
 
     public void Update()
     {
-        foreach (SamplePoint sp in ms.MeshApproximation.Samples)
+        for (int i = 0; i < ms.MeshApproximation.SampleCount; i++)
         {
-            if (ms.MeshApproximation.UnderWaterSamples.Contains(sp))
+            SamplePoint sp = ms.MeshApproximation.Samples[i];
+
+            if (ms.MeshApproximation.IsUnderWater[i] == 1)
             {
                 if (sp.LastPosition != null)
                 {
@@ -38,9 +40,6 @@ public class WaterDrag : IPhysicsComponent
         }
     }
 
-    public void DebugDraw()
-    {
-
-    }
+    public void DebugDraw() { }
 
 }

@@ -52,6 +52,7 @@ public class MeshSampler
 
     private void SampleMesh(int[] sampleCount_distribution, Transform[] linkedTransforms)
     {
+        int counter = 0;
         for (int i = 0; i < sampleCount_distribution.Length; i++)
         {
             boundsPos = meshRenderers[i].bounds.center;
@@ -66,7 +67,7 @@ public class MeshSampler
                 if (ValidateSample(sample_pos))
                 {
                     SamplePoint sample = new SamplePoint(sample_pos - linkedTransforms[i].position, linkedTransforms[i].rotation, linkedTransforms[i]);
-                    MeshApproximation.Samples.Add(sample);
+                    MeshApproximation.Samples[counter++] = sample;
                     ++j;
                 }
             }
