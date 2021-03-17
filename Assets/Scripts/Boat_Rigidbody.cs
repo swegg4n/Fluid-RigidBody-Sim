@@ -24,7 +24,7 @@ public class Boat_Rigidbody : MonoBehaviour
         List<MeshRenderer> meshRendererList = new List<MeshRenderer>();
         List<Transform> transformList = new List<Transform>();
 
-        if (GetComponent<MeshCollider>() != null)
+        if (GetComponent<Collider>() != null)
         {
             meshList.Add(GetComponent<MeshFilter>().sharedMesh);
             meshRendererList.Add(GetComponent<MeshRenderer>());
@@ -32,7 +32,7 @@ public class Boat_Rigidbody : MonoBehaviour
         }
         for (int i = 0; i < transform.childCount; i++)
         {
-            if (transform.GetChild(i).GetComponent<MeshCollider>() != null)
+            if (transform.GetChild(i).GetComponent<Collider>() != null)
             {
                 Transform child = transform.GetChild(i);
 
