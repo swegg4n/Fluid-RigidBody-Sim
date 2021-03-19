@@ -58,26 +58,28 @@ public class MeshSampler
             boundsPos = meshRenderers[i].bounds.center;
             boundsSize = new Vector3(meshRenderers[i].bounds.size.x, meshRenderers[i].bounds.size.y, meshRenderers[i].bounds.size.z);
 
-            int loopCap = 10000;
+            MeshCollider collider = linkedTransforms[i].GetComponent<MeshCollider>();
+            if (collider) collider.convex = false;
+
+            int loopCap = 1000000;
             int j = 0;
             while (j < sampleCount_distribution[i] && --loopCap > 0)
             {
                 Vector3 sample_pos = new Vector3(Random.Range(0, boundsSize.x), Random.Range(0, boundsSize.y), Random.Range(0, boundsSize.z)) + (boundsPos - boundsSize / 2);
 
-                MeshCollider collider = linkedTransforms[i].GetComponent<MeshCollider>();
-                if (collider) collider.convex = false;
-                bool valid = ValidateSample(sample_pos);
-                if (collider) collider.convex = true;
-
-                if (valid)
+                if (ValidateSample(sample_pos))
                 {
                     SamplePoint sample = new SamplePoint(sample_pos - linkedTransforms[i].position, linkedTransforms[i].rotation, linkedTransforms[i]);
                     MeshApproximation.Samples[counter++] = sample;
                     ++j;
                 }
-
-
             }
+            if (j < sampleCount_distribution[i])
+            {
+                throw new System.Exception("Failed to place all sample points");
+            }
+
+            if (collider) collider.convex = true;
         }
     }
 

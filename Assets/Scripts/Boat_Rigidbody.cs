@@ -21,9 +21,6 @@ public class Boat_Rigidbody : MonoBehaviour
 
     private void Awake()
     {
-        Rigidbody rb = GetComponent<Rigidbody>();
-        rb.isKinematic = true;
-
         List<Mesh> meshList = new List<Mesh>();
         List<MeshRenderer> meshRendererList = new List<MeshRenderer>();
         List<Transform> transformList = new List<Transform>();
@@ -56,10 +53,12 @@ public class Boat_Rigidbody : MonoBehaviour
 
         float totalMeshVolume = meshVolumes.Sum();
 
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.isKinematic = true;
+        rb.useGravity = false;
         rb.mass = density * totalMeshVolume;
         rb.drag = 0.0f;
         rb.angularDrag = 0.0f;
-        rb.useGravity = false;
 
         meshSampler = new MeshSampler(meshRenderers, transforms, DistributeSamples(meshVolumes, totalMeshVolume));
         gravity = new Gravity(rb, meshSampler);

@@ -8,7 +8,7 @@ public class MeshApproximation
     public SamplePoint[] Samples { get; private set; }
     public int[] IsUnderWater { get; private set; }
 
-    public int SampleCount { get; private set; }
+    public int SampleCount { get; set; }
 
 
     public MeshApproximation(int[] sampleCounts)
@@ -46,10 +46,10 @@ public class MeshApproximation
 
         foreach (SamplePoint sp in Samples)
         {
-            avg += sp.GlobalPosition / SampleCount;
+            avg += sp.GlobalPosition;
         }
 
-        return avg;
+        return avg / SampleCount;
     }
     public Vector3 AverageUnderWaterSamplePosition()
     {
@@ -59,17 +59,13 @@ public class MeshApproximation
         for (int i = 0; i < SampleCount; i++)
         {
             if (IsUnderWater[i] == 1)
-                ++underWaterSampleCount;
-        }
-        for (int i = 0; i < SampleCount; i++)
-        {
-            if (IsUnderWater[i] == 1)
             {
-                avg += Samples[i].GlobalPosition / underWaterSampleCount;
+                avg += Samples[i].GlobalPosition;
+                ++underWaterSampleCount;
             }
         }
 
-        return avg;
+        return avg / underWaterSampleCount;
     }
 
 }
