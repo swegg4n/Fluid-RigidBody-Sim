@@ -48,6 +48,6 @@ public class WaveManager : MonoBehaviour
 
     public float GetWaveHeight(Vector3 point)
     {
-        return amplitude * Mathf.Sin(point.x / ordinaryFrequency + phase);
+        return amplitude / transform.localScale.x / transform.localScale.y * Mathf.Sin(point.x / ordinaryFrequency / transform.localScale.x + phase);
     }
 }

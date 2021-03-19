@@ -7,6 +7,7 @@ using System.Collections.Generic;
 public class Boat_Rigidbody : MonoBehaviour
 {
     [SerializeField] private int sampleCount = 100;
+    [SerializeField] private float density = 997.0f;
     [SerializeField] private float viscosity = 1.0f;
 
     [SerializeField] private bool debug = true;
@@ -46,13 +47,19 @@ public class Boat_Rigidbody : MonoBehaviour
         MeshRenderer[] meshRenderers = meshRendererList.ToArray();
         Transform[] transforms = transformList.ToArray();
 
-        Rigidbody rb = GetComponent<Rigidbody>();
-
         float[] meshVolumes = new float[meshes.Length];
         for (int i = 0; i < meshes.Length; i++)
             meshVolumes[i] = MeshVolume.VolumeOfMesh(meshes[i], transforms[i]);
 
         float totalMeshVolume = meshVolumes.Sum();
+
+
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.mass = density * totalMeshVolume;
+        rb.drag = 0.0f;
+        rb.angularDrag = 0.0f;
+        rb.useGravity = false;
+
 
         meshSampler = new MeshSampler(meshRenderers, transforms, DistributeSamples(meshVolumes, totalMeshVolume));
         gravity = new Gravity(rb, meshSampler);

@@ -235,7 +235,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1110370115809948714}
   serializedVersion: 2
-  m_Mass: 130000
+  m_Mass: 1
   m_Drag: 0
   m_AngularDrag: 0
   m_UseGravity: 0
@@ -256,6 +256,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sampleCount: 1000
+  density: 900
   viscosity: 1
   debug: 1
 --- !u!1 &8260604869095513242
