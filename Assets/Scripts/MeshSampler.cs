@@ -64,12 +64,19 @@ public class MeshSampler
             {
                 Vector3 sample_pos = new Vector3(Random.Range(0, boundsSize.x), Random.Range(0, boundsSize.y), Random.Range(0, boundsSize.z)) + (boundsPos - boundsSize / 2);
 
-                if (ValidateSample(sample_pos))
+                MeshCollider collider = linkedTransforms[i].GetComponent<MeshCollider>();
+                if (collider) collider.convex = false;
+                bool valid = ValidateSample(sample_pos);
+                if (collider) collider.convex = true;
+
+                if (valid)
                 {
                     SamplePoint sample = new SamplePoint(sample_pos - linkedTransforms[i].position, linkedTransforms[i].rotation, linkedTransforms[i]);
                     MeshApproximation.Samples[counter++] = sample;
                     ++j;
                 }
+
+
             }
         }
     }

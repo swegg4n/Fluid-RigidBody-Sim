@@ -55,11 +55,17 @@ public class MeshApproximation
     {
         Vector3 avg = Vector3.zero;
 
+        float underWaterSampleCount = 0;
+        for (int i = 0; i < SampleCount; i++)
+        {
+            if (IsUnderWater[i] == 1)
+                ++underWaterSampleCount;
+        }
         for (int i = 0; i < SampleCount; i++)
         {
             if (IsUnderWater[i] == 1)
             {
-                avg += Samples[i].GlobalPosition / SampleCount;
+                avg += Samples[i].GlobalPosition / underWaterSampleCount;
             }
         }
 
