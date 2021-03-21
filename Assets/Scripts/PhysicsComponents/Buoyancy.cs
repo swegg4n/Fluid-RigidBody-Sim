@@ -42,7 +42,7 @@ public class Buoyancy : IPhysicsComponent
         {
             if (ms.MeshApproximation.IsUnderWater[i] == 1)
             {
-                Gizmos.DrawSphere(ms.MeshApproximation.Samples[i].GlobalPosition, 0.1f);
+                Gizmos.DrawSphere(ms.MeshApproximation.Samples[i].GlobalPosition, Gizmos.probeSize);
             }
         }
     }

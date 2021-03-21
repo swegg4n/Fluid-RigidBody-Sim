@@ -6,9 +6,6 @@ public class WaterDrag : IPhysicsComponent
     private MeshSampler ms;
     private float viscosity;
 
-    private int sampleCount;
-
-
     public WaterDrag(Rigidbody rb, MeshSampler ms, float viscosity)
     {
         this.rb = rb;
