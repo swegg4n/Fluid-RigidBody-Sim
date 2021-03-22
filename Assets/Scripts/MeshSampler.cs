@@ -90,7 +90,7 @@ public class MeshSampler
             bounds_stratified = bounds_stratified.OrderBy(x => Random.value).ToArray();
             this.bounds_stratified.Add(bounds_stratified);//for debugging
 
-            int loopCap = 100 * sampleCount_distribution[i];
+            int loopCap = 1000 * sampleCount_distribution[i];
             int j = 0;
             while (j < sampleCount_distribution[i] && --loopCap > 0)
             {

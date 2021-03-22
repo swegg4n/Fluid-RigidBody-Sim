@@ -13,7 +13,6 @@ public class Boat_Rigidbody : MonoBehaviour
     [SerializeField] private float viscosity = 1.0f;
 
     [SerializeField] private bool debugDraw = true;
-    [SerializeField] private bool debugText = true;
 
 
     MeshSampler meshSampler;
