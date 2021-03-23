@@ -65,8 +65,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sampleCount: 1000
   stratifiedDivisions: 10
-  density: 600
-  viscosity: 1
+  density: 700
+  viscosity: 4
   debugParticles: 1
   debugBounds: 1
 --- !u!1 &5962901643018578474
