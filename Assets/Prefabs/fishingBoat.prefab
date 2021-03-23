@@ -93,7 +93,7 @@ GameObject:
   - component: {fileID: 4779644240422652828}
   - component: {fileID: 4779644240422652829}
   m_Layer: 0
-  m_Name: FishingBoat
+  m_Name: fishingBoat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -106,7 +106,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5662674879702333136}
-  m_LocalRotation: {x: -0, y: -0.70710677, z: -0, w: 0.7071068}
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_Children:
@@ -143,9 +143,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6493a432cdf0de74f873fbcc1dea694c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sampleCount: 100
-  stratifiedDivisions: 0
-  density: 700
+  sampleCount: 1000
+  stratifiedDivisions: 20
+  density: 400
   viscosity: 1
   debugDraw: 1
 --- !u!1 &6422161553941850201
