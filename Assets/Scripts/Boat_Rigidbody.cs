@@ -12,8 +12,8 @@ public class Boat_Rigidbody : MonoBehaviour
     [SerializeField] private float density = 997.0f;
     [SerializeField] private float viscosity = 1.0f;
 
-    [SerializeField] private bool debugDraw = true;
-
+    [SerializeField] private bool debugParticles = true;
+    [SerializeField] private bool debugBounds = true;
 
     MeshSampler meshSampler;
     Gravity gravity;
@@ -49,10 +49,14 @@ public class Boat_Rigidbody : MonoBehaviour
         MeshRenderer[] meshRenderers = meshRendererList.ToArray();
         Transform[] transforms = transformList.ToArray();
 
-        float[] meshVolumes = new float[meshes.Length];
-        for (int i = 0; i < meshes.Length; i++)
-            meshVolumes[i] = MeshVolume.VolumeOfMesh(meshes[i], transforms[i]);
+        float[] boundsVolumes = new float[meshes.Length];
+        for (int i = 0; i < boundsVolumes.Length; i++)
+            boundsVolumes[i] = meshRenderers[i].bounds.size.x * meshRenderers[i].bounds.size.y * meshRenderers[i].bounds.size.z;
+        float totalBoundsVolume = boundsVolumes.Sum();
 
+        float[] meshVolumes = new float[meshes.Length];
+        for (int i = 0; i < meshVolumes.Length; i++)
+            meshVolumes[i] = MeshVolume.VolumeOfMesh(meshes[i], transforms[i]);
         float totalMeshVolume = meshVolumes.Sum();
 
         Rigidbody rb = GetComponent<Rigidbody>();
@@ -62,7 +66,7 @@ public class Boat_Rigidbody : MonoBehaviour
         rb.drag = 0.0f;
         rb.angularDrag = 0.0f;
 
-        meshSampler = new MeshSampler(meshRenderers, transforms, DistributeSamples(meshVolumes, totalMeshVolume), stratifiedDivisions);
+        meshSampler = new MeshSampler(meshRenderers, transforms, DistributeSamples(boundsVolumes, totalBoundsVolume), stratifiedDivisions);
         gravity = new Gravity(rb, meshSampler);
         buoyancy = new Buoyancy(rb, meshSampler, totalMeshVolume);
         waterDrag = new WaterDrag(rb, meshSampler, viscosity);
@@ -70,14 +74,14 @@ public class Boat_Rigidbody : MonoBehaviour
         rb.isKinematic = false;
     }
 
-    private int[] DistributeSamples(float[] meshVolumes, float totalVolume)
+    private int[] DistributeSamples(float[] boundsVolumes, float totalBoundsVolume)
     {
-        int[] distribution = new int[meshVolumes.Length];
+        int[] distribution = new int[boundsVolumes.Length];
         int totalDistributions = 0;
 
         for (int i = 0; i < distribution.Length; i++)
         {
-            int d = (int)(meshVolumes[i] / totalVolume * sampleCount);
+            int d = (int)(boundsVolumes[i] / totalBoundsVolume * sampleCount);
             distribution[i] = d;
             totalDistributions += d;
         }
@@ -102,14 +106,22 @@ public class Boat_Rigidbody : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (debugDraw)
+        if (debugParticles)
+        {
+            try
+            {
+                //meshSampler.DebugDraw();
+                gravity.DebugDraw();
+                buoyancy.DebugDraw();
+                waterDrag.DebugDraw();
+            }
+            catch (Exception) { }
+        }
+        if (debugBounds)
         {
             try
             {
                 meshSampler.DebugDraw();
-                gravity.DebugDraw();
-                buoyancy.DebugDraw();
-                waterDrag.DebugDraw();
             }
             catch (Exception) { }
         }
