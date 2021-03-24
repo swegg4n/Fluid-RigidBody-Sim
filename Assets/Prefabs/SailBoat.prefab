@@ -67,8 +67,8 @@ MonoBehaviour:
   stratifiedDivisions: 10
   density: 700
   viscosity: 4
-  debugParticles: 1
-  debugBounds: 1
+  debugParticles: 0
+  debugBounds: 0
 --- !u!1 &5962901643018578474
 GameObject:
   m_ObjectHideFlags: 0

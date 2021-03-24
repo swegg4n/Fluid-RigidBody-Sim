@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using UnityEditor;
 
 [RequireComponent(typeof(Rigidbody))]
-public class Boat_Rigidbody : MonoBehaviour
+public class BoatRigidbody : MonoBehaviour
 {
     [SerializeField] private int sampleCount = 100;
     [SerializeField] private int stratifiedDivisions = 0;
@@ -75,6 +75,16 @@ public class Boat_Rigidbody : MonoBehaviour
 
         rb.isKinematic = false;
     }
+
+
+    public void Set(int sampleCount, int stratifiedDivisions, float density, float viscosity)
+    {
+        this.sampleCount = sampleCount;
+        this.stratifiedDivisions = stratifiedDivisions;
+        this.density = density;
+        this.viscosity = viscosity;
+    }
+
 
     private int[] DistributeSamples(float[] boundsVolumes, float totalBoundsVolume)
     {

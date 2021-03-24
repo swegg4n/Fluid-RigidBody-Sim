@@ -43,4 +43,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1da58c226c129d145b891fa970548c66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  waterRenderer: {fileID: 0}
+  testCases:
+  - {fileID: 11400000, guid: fa4b77fc828cb1149960ac28a77c00b5, type: 2}
+  waterInstance: {fileID: 0}

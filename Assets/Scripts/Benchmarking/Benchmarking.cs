@@ -6,38 +6,65 @@ public class Benchmarking : MonoBehaviour
 {
     private string benchmarkPath;
 
-    [SerializeField] private MeshRenderer waterRenderer;
+    [SerializeField] private TestCase[] testCases;
+    [SerializeField] private GameObject waterInstance;
+
+    private bool testComplete = false;
+
 
 
     private void Awake()
     {
-        benchmarkPath = Application.dataPath + "/Benchmark/";
+        benchmarkPath = Application.dataPath + "/Test_Results/";
 
         /*Change settings to fit benchmark test (eg. remove water, remove self collisions(?), change render settings(?))*/
-        waterRenderer.enabled = false;
+        waterInstance.GetComponent<MeshRenderer>().enabled = false;
     }
 
 
     private void Start()
     {
-        StartCoroutine(RunBenchmark("Fps_test_01", 1000));
+        StartCoroutine(RunAllBenchmarks());
     }
 
-    private IEnumerator RunBenchmark(string testName, int testLength)
+
+
+    private IEnumerator RunAllBenchmarks()
     {
-        using (StreamWriter writer = new StreamWriter(benchmarkPath + testName + ".txt"))
+        for (int i = 0; i < testCases.Length; i++)
         {
-            float[] fps = new float[testLength];
+            testComplete = false;
+            StartCoroutine(RunBenchmark(testCases[i]));
+
+            while (testComplete == false) { yield return new WaitForSeconds(1.0f); }  //spin wait
+        }
+
+    }
 
 
-            Debug.Log($"Running benchmark: {testName}");
 
+    private IEnumerator RunBenchmark(TestCase testCase)
+    {
+        /*Set the wave manager settings according to the test case*/
+        this.waterInstance.GetComponent<WaveManager>().Set(testCase.amplitude, testCase.ordinaryFrequency, testCase.angluarFrequency);
+
+        /*Instantiate a new boat to test with*/
+        GameObject boatInstance = Instantiate(testCase.prefab, testCase.position, Quaternion.identity);
+        boatInstance.GetComponent<BoatRigidbody>().Set(testCase.sampleCount, testCase.stratifiedDivisions, testCase.density, testCase.viscosity);
+
+        yield return new WaitForSeconds(Time.deltaTime);    //Delay to not have instantiation manipulate test results. (instantiate is computationally heavy)
+
+        using (StreamWriter writer = new StreamWriter(benchmarkPath + testCase.name + ".txt"))
+        {
+            float[] fps = new float[testCase.testLength];
+
+            Debug.Log($"Running benchmark: {testCase.name}");
 
             int framesCounter = 0;
-            while (framesCounter < testLength)
+            while (framesCounter < testCase.testLength)
             {
                 if (framesCounter % 100 == 0)
-                    Debug.Log($"{testName}:  {(framesCounter * 100) / testLength}%");
+                    Debug.Log($"{testCase.name}:  {(framesCounter * 100) / testCase.testLength}%");
 
                 /*Save relevant data per frame*/
                 fps[framesCounter] = GetFPS();
@@ -48,15 +75,19 @@ public class Benchmarking : MonoBehaviour
             }
 
             /*Debug test results*/
-            Debug.Log($"Benchmark \"{testName}\" - Completed");
-            Debug.Log($"Test length:  {testLength} frames");
-            Debug.Log($"Average FPS:  {GetAverageFPS(fps, testLength)}");
+            Debug.Log($"Benchmark \"{testCase.name}\" - Completed");
+            Debug.Log($"Test length:  {testCase.testLength} frames");
+            Debug.Log($"Average FPS:  {GetAverageFPS(fps, testCase.testLength)}");
 
             /*Compile test results to file*/
-            writer.WriteLine($"{testName}");
-            writer.WriteLine($"{testLength}");
-            writer.WriteLine($"{GetAverageFPS(fps, testLength)}");
+            writer.WriteLine($"{testCase.name}");
+            writer.WriteLine($"{testCase.testLength}");
+            writer.WriteLine($"{GetAverageFPS(fps, testCase.testLength)}");
         }
+
+        Destroy(boatInstance);
+
+        testComplete = true;
     }
 
 

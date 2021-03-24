@@ -33,6 +33,14 @@ public class WaveManager : MonoBehaviour
     }
 
 
+    public void Set(float amplitude, float ordinaryFrequency, float angluarFrequency)
+    {
+        this.amplitude = amplitude;
+        this.ordinaryFrequency = ordinaryFrequency;
+        this.angluarFrequency = angluarFrequency;
+    }
+
+
     private void Update()
     {
         phase += angluarFrequency * Time.deltaTime;
