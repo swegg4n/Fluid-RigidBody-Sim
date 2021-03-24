@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Benchmarking : MonoBehaviour
 {
-    private string benchmarkPath;
+    private string benchmarkPath = "F:/Programming/Fluid-RigidBody-Sim/Assets/Test_Results/";   //temp absolute path
 
     [SerializeField] private TestCase[] testCases;
     [SerializeField] private GameObject waterInstance;
@@ -15,7 +15,7 @@ public class Benchmarking : MonoBehaviour
 
     private void Awake()
     {
-        benchmarkPath = Application.dataPath + "/Test_Results/";
+        //benchmarkPath = Application.dataPath + "/Test_Results/";
 
         /*Change settings to fit benchmark test (eg. remove water, remove self collisions(?), change render settings(?))*/
         waterInstance.GetComponent<MeshRenderer>().enabled = false;
