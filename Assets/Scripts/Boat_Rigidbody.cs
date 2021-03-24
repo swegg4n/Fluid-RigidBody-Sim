@@ -12,8 +12,8 @@ public class Boat_Rigidbody : MonoBehaviour
     [SerializeField] private float density = 997.0f;
     [SerializeField] private float viscosity = 1.0f;
 
-    [SerializeField] private bool debugParticles = true;
-    [SerializeField] private bool debugBounds = true;
+    [SerializeField] private bool debugParticles = false;
+    [SerializeField] private bool debugBounds = false;
 
     MeshSampler meshSampler;
     Gravity gravity;
@@ -23,6 +23,8 @@ public class Boat_Rigidbody : MonoBehaviour
 
     private void Awake()
     {
+        Debug.Log("Initializing...");
+
         List<Mesh> meshList = new List<Mesh>();
         List<MeshRenderer> meshRendererList = new List<MeshRenderer>();
         List<Transform> transformList = new List<Transform>();

@@ -1,62 +1,62 @@
+using System.Collections;
+using System.IO;
 using UnityEngine;
 
 public class Benchmarking : MonoBehaviour
 {
-    private int testLength = 1000;      //numbers of frames to test
-    bool running = false;
+    private string benchmarkPath;
 
-    private int frameCounter = 0;
+    [SerializeField] private MeshRenderer waterRenderer;
 
 
-    private float[] fps;
+    private void Awake()
+    {
+        benchmarkPath = Application.dataPath + "/Benchmark/";
 
+        /*Change settings to fit benchmark test (eg. remove water, remove self collisions(?), change render settings(?))*/
+        waterRenderer.enabled = false;
+    }
 
 
     private void Start()
     {
-        fps = new float[testLength];
-
-        Debug.Log($"BENCHMARK START - test length: {testLength} frames");
-        running = true;
+        StartCoroutine(RunBenchmark("Fps_test_01", 1000));
     }
 
-
-    private void Update()
+    private IEnumerator RunBenchmark(string testName, int testLength)
     {
-        if (frameCounter < testLength)
+        using (StreamWriter writer = new StreamWriter(benchmarkPath + testName + ".txt"))
         {
-            //info about test scenario (#samples, #divisions, wave properties)
+            float[] fps = new float[testLength];
 
-            fps[frameCounter] = GetFPS();
-            //memory
-            //correctness
 
-            frameCounter++;
+            Debug.Log($"Running benchmark: {testName}");
 
-            if (frameCounter % 100 == 0)
+
+            int framesCounter = 0;
+            while (framesCounter < testLength)
             {
-            Debug.Log($"Benchmarking:  {frameCounter} / {testLength}  complete");
+                if (framesCounter % 100 == 0)
+                    Debug.Log($"{testName}:  {(framesCounter * 100) / testLength}%");
+
+                /*Save relevant data per frame*/
+                fps[framesCounter] = GetFPS();
+
+
+                yield return new WaitForSeconds(Time.deltaTime);
+                ++framesCounter;
             }
 
-        }
-        else if (running)
-        {
-            StopBenchmark();
-        }
-    }
+            /*Debug test results*/
+            Debug.Log($"Benchmark \"{testName}\" - Completed");
+            Debug.Log($"Test length:  {testLength} frames");
+            Debug.Log($"Average FPS:  {GetAverageFPS(fps, testLength)}");
 
-    private void StopBenchmark()
-    {
-        running = false;
-        Debug.Log("---BENCHMARK END---");
-        Debug.Log("- #Frames tested:  " + frameCounter);
-        Debug.Log("- Average FPS:  " + GetAverageFPS());
-        Debug.Log("-------------------");
-    }
-
-    private void OnApplicationQuit()
-    {
-        StopBenchmark();
+            /*Compile test results to file*/
+            writer.WriteLine($"{testName}");
+            writer.WriteLine($"{testLength}");
+            writer.WriteLine($"{GetAverageFPS(fps, testLength)}");
+        }
     }
 
 
@@ -65,12 +65,12 @@ public class Benchmarking : MonoBehaviour
     {
         return 1.0f / Time.deltaTime;
     }
-    private float GetAverageFPS()
+    private float GetAverageFPS(float[] fps, float testLength)
     {
         float averageFps = 0.0f;
 
         for (int i = 0; i < fps.Length; i++)
-            averageFps += (fps[i] / frameCounter);
+            averageFps += (fps[i] / testLength);
 
         return averageFps;
     }
