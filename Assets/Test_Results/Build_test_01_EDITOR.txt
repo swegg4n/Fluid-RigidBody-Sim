@@ -1,3 +1,9 @@
-Build_test_01_EDITOR
-1000
-224.3294
+Test length:  1000
+Type of test:  Correctness
+Prefab name:  SailBoat
+Sample count:  100
+Stratified divisions:  0
+Amplitude:  0.1
+Ordinary frequency  1.5
+Angular frequency  1
+Avg. correctness:  0.9395391

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -8,6 +9,9 @@ public class Benchmarking : MonoBehaviour
 
     [SerializeField] private TestCase[] testCases;
     [SerializeField] private GameObject waterInstance;
+
+    private static GameObject boatInstance = null;
+    private static GameObject referenceBoatInstance = null;
 
     private bool testComplete = false;
 
@@ -21,8 +25,12 @@ public class Benchmarking : MonoBehaviour
             this.testLength = testCase.testLength;
             this.typeOfTest = testCase.typeOfTest.ToString();
             this.prefabName = testCase.prefab.name;
+
             this.sampleCount = testCase.sampleCount;
             this.stratifiedDivisions = testCase.stratifiedDivisions;
+            this.density = testCase.density;
+            this.viscosity = testCase.viscosity;
+
             this.amplitude = testCase.amplitude;
             this.ordinaryFrequency = testCase.ordinaryFrequency;
             this.angluarFrequency = testCase.angluarFrequency;
@@ -34,13 +42,33 @@ public class Benchmarking : MonoBehaviour
 
         public int sampleCount;
         public int stratifiedDivisions;
-        //public int density;
-        //public int viscosity;
+        public float density;
+        public float viscosity;
 
         public float amplitude;
         public float ordinaryFrequency;
         public float angluarFrequency;
-    }
+
+
+        public abstract void SaveFrame(int frame);
+
+
+        public virtual new List<string> ToString()
+        {
+            List<string> result = new List<string>()
+            {
+                "Test length:  " + testLength.ToString(),
+                "Type of test:  " + typeOfTest,
+                "Prefab name:  " + prefabName,
+                "Sample count:  " + sampleCount,
+                "Stratified divisions:  " + stratifiedDivisions,
+                "Amplitude:  " + amplitude,
+                "Ordinary frequency  " + ordinaryFrequency,
+                "Angular frequency  " + angluarFrequency,
+            };
+            return result;
+        }
+    };
 
 
     private class PerformanceTestResult : TestResult
@@ -53,7 +81,22 @@ public class Benchmarking : MonoBehaviour
         public float[] fps;
         //memory
         //...
-    }
+
+
+        public override void SaveFrame(int frame)
+        {
+            this.fps[frame] = BenchmarkHelper.GetFPS();
+        }
+
+        public override List<string> ToString()
+        {
+            List<string> result = base.ToString();
+
+            result.Add("Avg. FPS:  " + BenchmarkHelper.AverageValue(fps).ToString());
+
+            return result;
+        }
+    };
 
     private class CorrectnessTestResult : TestResult
     {
@@ -64,7 +107,22 @@ public class Benchmarking : MonoBehaviour
 
         public float[] correctness;
         //...
-    }
+
+
+        public override void SaveFrame(int frame)
+        {
+            this.correctness[frame] = BenchmarkHelper.CalculateCorrectness(Benchmarking.boatInstance.transform, Benchmarking.referenceBoatInstance.transform);
+        }
+
+        public override List<string> ToString()
+        {
+            List<string> result = base.ToString();
+
+            result.Add("Avg. correctness:  " + BenchmarkHelper.AverageValue(correctness).ToString());
+
+            return result;
+        }
+    };
 
 
 
@@ -124,15 +182,17 @@ public class Benchmarking : MonoBehaviour
         this.waterInstance.GetComponent<WaveManager>().Set(testCase.amplitude, testCase.ordinaryFrequency, testCase.angluarFrequency);
 
         /*Instantiate a new boat to test with*/
-        GameObject boatInstance = Instantiate(testCase.prefab, testCase.position, Quaternion.identity);
+        boatInstance = Instantiate(testCase.prefab, testCase.position, Quaternion.identity);
         boatInstance.GetComponent<BoatRigidbody>().Set(testCase.sampleCount, testCase.stratifiedDivisions, testCase.density, testCase.viscosity);
 
-        GameObject referenceBoatInstance;
         if (testCase.typeOfTest == TypeOfTest.Correctness)  //If we aim to test correctness => instantiate one more boat with high sample count, to test against.
         {
             referenceBoatInstance = Instantiate(testCase.prefab, testCase.position, Quaternion.identity);
-            boatInstance.GetComponent<BoatRigidbody>().Set(10000, testCase.stratifiedDivisions, testCase.density, testCase.viscosity);
-            boatInstance.layer = 6;     //Set layer to "Reference", non-colliding layer
+            referenceBoatInstance.GetComponent<BoatRigidbody>().Set(10000, testCase.stratifiedDivisions, testCase.density, testCase.viscosity);
+
+            referenceBoatInstance.layer = 6;     //Set layer to "Reference", non-colliding layer
+            for (int i = 0; i < referenceBoatInstance.transform.childCount; i++)
+                referenceBoatInstance.transform.GetChild(i).gameObject.layer = 6;
         }
 
 
@@ -147,8 +207,6 @@ public class Benchmarking : MonoBehaviour
 
         using (StreamWriter writer = new StreamWriter(benchmarkPath + testName + ".txt"))
         {
-            float[] fps = new float[testCase.testLength];
-
             Debug.Log($"Running benchmark: {testName}");
 
             int framesCounter = 0;
@@ -157,49 +215,31 @@ public class Benchmarking : MonoBehaviour
                 if (framesCounter % 100 == 0)
                     Debug.Log($"{testName}:  {(framesCounter * 100) / testCase.testLength}%");  //DEBUG progress
 
-                SaveTestData(framesCounter, testCase.typeOfTest);   // Save data for this frame, based on which type of test we are running
+
+                testResult.SaveFrame(framesCounter);    //Update the test result values with data from this frame
+
 
                 yield return new WaitForSeconds(Time.deltaTime);    // Wait for next frame
                 ++framesCounter;
             }
 
-            /*Debug test results*/
-            Debug.Log($"Benchmark \"{testName}\" - Completed");
-            Debug.Log($"Test length:  {testCase.testLength} frames");
-            Debug.Log($"Average FPS:  {GetAverageFPS(fps, testCase.testLength)}");
 
-            /*Compile test results to file*/
-            writer.WriteLine($"{testName}");
-            writer.WriteLine($"{testCase.testLength}");
-            writer.WriteLine($"{GetAverageFPS(fps, testCase.testLength)}");
+            #region Write/Log results
+            Debug.Log($"Benchmark \"{testName}\" - Completed");
+
+            foreach (string result in testResult.ToString())
+            {
+                writer.WriteLine(result);
+                Debug.Log(result);
+            }
+            #endregion
         }
 
         Destroy(boatInstance);
+        Destroy(referenceBoatInstance);
 
         testComplete = true;
     }
 
 
-
-    private void SaveTestData(int frame, TypeOfTest typeOfTest)
-    {
-        //fps[framesCounter] = GetFPS();
-    }
-
-
-
-    private float GetFPS()
-    {
-        return 1.0f / Time.deltaTime;
-    }
-    private float GetAverageFPS(float[] fps, float testLength)
-    {
-        float averageFps = 0.0f;
-
-        for (int i = 0; i < fps.Length; i++)
-            averageFps += (fps[i] / testLength);
-
-        return averageFps;
-    }
-
-}
+};

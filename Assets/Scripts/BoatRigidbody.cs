@@ -23,8 +23,11 @@ public class BoatRigidbody : MonoBehaviour
 
     private void Awake()
     {
-        Debug.Log("Initializing...");
+        //Initialize()
+    }
 
+    public void Initialize()
+    {
         List<Mesh> meshList = new List<Mesh>();
         List<MeshRenderer> meshRendererList = new List<MeshRenderer>();
         List<Transform> transformList = new List<Transform>();
@@ -83,6 +86,8 @@ public class BoatRigidbody : MonoBehaviour
         this.stratifiedDivisions = stratifiedDivisions;
         this.density = density;
         this.viscosity = viscosity;
+
+        Initialize();
     }
 
 
