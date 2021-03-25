@@ -1,10 +1,14 @@
 using UnityEngine;
 
 
+public enum TypeOfTest { Performance, Correctness }
+
+
 [CreateAssetMenu(fileName = "TestCase", menuName = "Benchmark/TestCase", order = 1)]
 public class TestCase : ScriptableObject
 {
     public int testLength = 1000;  //number of frames to test
+    public TypeOfTest typeOfTest;
 
     public GameObject prefab;
     public Vector3 position = new Vector3(0, 0, 0);

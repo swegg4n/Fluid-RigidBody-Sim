@@ -11,6 +11,61 @@ public class Benchmarking : MonoBehaviour
 
     private bool testComplete = false;
 
+    TestResult testResult;
+
+
+    private abstract class TestResult
+    {
+        public TestResult(TestCase testCase)
+        {
+            this.testLength = testCase.testLength;
+            this.typeOfTest = testCase.typeOfTest.ToString();
+            this.prefabName = testCase.prefab.name;
+            this.sampleCount = testCase.sampleCount;
+            this.stratifiedDivisions = testCase.stratifiedDivisions;
+            this.amplitude = testCase.amplitude;
+            this.ordinaryFrequency = testCase.ordinaryFrequency;
+            this.angluarFrequency = testCase.angluarFrequency;
+        }
+
+        public int testLength;
+        public string typeOfTest;
+        public string prefabName;
+
+        public int sampleCount;
+        public int stratifiedDivisions;
+        //public int density;
+        //public int viscosity;
+
+        public float amplitude;
+        public float ordinaryFrequency;
+        public float angluarFrequency;
+    }
+
+
+    private class PerformanceTestResult : TestResult
+    {
+        public PerformanceTestResult(TestCase testCase) : base(testCase)
+        {
+            this.fps = new float[testCase.testLength];
+        }
+
+        public float[] fps;
+        //memory
+        //...
+    }
+
+    private class CorrectnessTestResult : TestResult
+    {
+        public CorrectnessTestResult(TestCase testCase) : base(testCase)
+        {
+            this.correctness = new float[testCase.testLength];
+        }
+
+        public float[] correctness;
+        //...
+    }
+
 
 
     private void Awake()
@@ -20,7 +75,7 @@ public class Benchmarking : MonoBehaviour
         if (!Directory.Exists(benchmarkPath))   //Creates the Test_Results folder for builds
             Directory.CreateDirectory(benchmarkPath);
 #endif
-        /*Change settings to fit benchmark test (eg. remove water, remove self collisions(?), change render settings(?))*/
+        /*Change settings to fit benchmark test (eg. remove water, change render settings(?))*/
         waterInstance.GetComponent<MeshRenderer>().enabled = false;
     }
 
@@ -29,7 +84,6 @@ public class Benchmarking : MonoBehaviour
     {
         StartCoroutine(RunAllBenchmarks());
     }
-
 
 
     private IEnumerator RunAllBenchmarks()
@@ -55,12 +109,32 @@ public class Benchmarking : MonoBehaviour
 
     private IEnumerator RunBenchmark(TestCase testCase)
     {
+        switch (testCase.typeOfTest)
+        {
+            case TypeOfTest.Performance:
+                testResult = new PerformanceTestResult(testCase);
+                break;
+
+            case TypeOfTest.Correctness:
+                testResult = new CorrectnessTestResult(testCase);
+                break;
+        }
+
         /*Set the wave manager settings according to the test case*/
         this.waterInstance.GetComponent<WaveManager>().Set(testCase.amplitude, testCase.ordinaryFrequency, testCase.angluarFrequency);
 
         /*Instantiate a new boat to test with*/
         GameObject boatInstance = Instantiate(testCase.prefab, testCase.position, Quaternion.identity);
         boatInstance.GetComponent<BoatRigidbody>().Set(testCase.sampleCount, testCase.stratifiedDivisions, testCase.density, testCase.viscosity);
+
+        GameObject referenceBoatInstance;
+        if (testCase.typeOfTest == TypeOfTest.Correctness)  //If we aim to test correctness => instantiate one more boat with high sample count, to test against.
+        {
+            referenceBoatInstance = Instantiate(testCase.prefab, testCase.position, Quaternion.identity);
+            boatInstance.GetComponent<BoatRigidbody>().Set(10000, testCase.stratifiedDivisions, testCase.density, testCase.viscosity);
+            boatInstance.layer = 6;     //Set layer to "Reference", non-colliding layer
+        }
+
 
         string testName = testCase.name;
 #if UNITY_EDITOR
@@ -81,13 +155,11 @@ public class Benchmarking : MonoBehaviour
             while (framesCounter < testCase.testLength)
             {
                 if (framesCounter % 100 == 0)
-                    Debug.Log($"{testName}:  {(framesCounter * 100) / testCase.testLength}%");
+                    Debug.Log($"{testName}:  {(framesCounter * 100) / testCase.testLength}%");  //DEBUG progress
 
-                /*Save relevant data per frame*/
-                fps[framesCounter] = GetFPS();
+                SaveTestData(framesCounter, testCase.typeOfTest);   // Save data for this frame, based on which type of test we are running
 
-
-                yield return new WaitForSeconds(Time.deltaTime);
+                yield return new WaitForSeconds(Time.deltaTime);    // Wait for next frame
                 ++framesCounter;
             }
 
@@ -105,6 +177,13 @@ public class Benchmarking : MonoBehaviour
         Destroy(boatInstance);
 
         testComplete = true;
+    }
+
+
+
+    private void SaveTestData(int frame, TypeOfTest typeOfTest)
+    {
+        //fps[framesCounter] = GetFPS();
     }
 
 
