@@ -7,6 +7,8 @@ public class Benchmarking : MonoBehaviour
 {
     private string benchmarkPath;
 
+    private const int REFERENCE_BOAT_SAMPLES = 10000;
+
     [SerializeField] private TestCase[] testCases;
     [SerializeField] private GameObject waterInstance;
 
@@ -186,6 +188,7 @@ public class Benchmarking : MonoBehaviour
         /*Set the wave manager settings according to the test case*/
         this.waterInstance.GetComponent<WaveManager>().Set(testCase.amplitude, testCase.ordinaryFrequency, testCase.angluarFrequency);
 
+
         /*Instantiate a new boat to test with*/
         boatInstance = Instantiate(testCase.prefab, testCase.position, Quaternion.identity);
         boatInstance.GetComponent<BoatRigidbody>().Set(testCase.sampleCount, testCase.stratifiedDivisions, testCase.density, testCase.viscosity);
@@ -193,7 +196,7 @@ public class Benchmarking : MonoBehaviour
         if (testCase.typeOfTest == TypeOfTest.Correctness)  //If we aim to test correctness => instantiate one more boat with high sample count, to test against.
         {
             referenceBoatInstance = Instantiate(testCase.prefab, testCase.position, Quaternion.identity);
-            referenceBoatInstance.GetComponent<BoatRigidbody>().Set(10000, testCase.stratifiedDivisions, testCase.density, testCase.viscosity);
+            referenceBoatInstance.GetComponent<BoatRigidbody>().Set(REFERENCE_BOAT_SAMPLES, testCase.stratifiedDivisions, testCase.density, testCase.viscosity);
 
             referenceBoatInstance.layer = 6;     //Set layer to "Reference", non-colliding layer
             for (int i = 0; i < referenceBoatInstance.transform.childCount; i++)
@@ -210,6 +213,7 @@ public class Benchmarking : MonoBehaviour
 
         yield return new WaitForSeconds(Time.deltaTime);    //Delay to not have instantiation manipulate test results. (instantiate is computationally heavy)
 
+
         using (StreamWriter writer = new StreamWriter(benchmarkPath + testName + ".txt"))
         {
             Debug.Log($"Running benchmark: {testName}");
@@ -217,7 +221,7 @@ public class Benchmarking : MonoBehaviour
             int framesCounter = 0;
             while (framesCounter < testCase.testLength)
             {
-                if (framesCounter % 100 == 0)
+                if (framesCounter % 10 == 0)
                     Debug.Log($"{testName}:  {(framesCounter * 100) / testCase.testLength}%");  //DEBUG progress
 
 

@@ -21,10 +21,6 @@ public class BoatRigidbody : MonoBehaviour
     WaterDrag waterDrag;
 
 
-    private void Awake()
-    {
-        //Initialize()
-    }
 
     public void Initialize()
     {
