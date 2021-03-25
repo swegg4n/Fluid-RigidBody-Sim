@@ -5,12 +5,12 @@ using UnityEngine;
 public static class BenchmarkHelper
 {
 
-    public static float AverageValue(float[] t)
+    public static T AverageValue<T>(T[] t)
     {
-        float avg = 0.0f;
+        dynamic avg = 0;
 
         for (int i = 0; i < t.Length; i++)
-            avg += (t[i] / t.Length);
+            avg += (dynamic)t[i] / t.Length;
 
         return avg;
     }
@@ -21,6 +21,10 @@ public static class BenchmarkHelper
         return 1.0f / Time.deltaTime;
     }
 
+    public static long GetMemoryUsage()
+    {
+        return System.GC.GetTotalMemory(false); //Returns the memory usage in bytes
+    }
 
     public static float CalculateCorrectness(Transform original, Transform reference)
     {

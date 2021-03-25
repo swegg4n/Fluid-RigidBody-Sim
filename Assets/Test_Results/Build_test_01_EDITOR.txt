@@ -1,9 +1,14 @@
 Test length:  1000
-Type of test:  Correctness
+Type of test:  Performance
+CPU: Intel(R) Core(TM) i5-4670K CPU @ 3.40GHz (3398)
+
 Prefab name:  SailBoat
 Sample count:  100
 Stratified divisions:  0
+
 Amplitude:  0.1
 Ordinary frequency  1.5
 Angular frequency  1
-Avg. correctness:  0.9395391
+
+Avg. FPS:  298.375
+Avg. Memory usage:  13067689 bytes

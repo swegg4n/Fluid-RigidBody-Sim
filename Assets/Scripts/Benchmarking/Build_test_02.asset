@@ -16,7 +16,7 @@ MonoBehaviour:
   typeOfTest: 1
   prefab: {fileID: 1259726916372167871, guid: a900679e569a66b42a2bc7ac0a181733, type: 3}
   position: {x: 0, y: 0, z: 0}
-  sampleCount: 1
+  sampleCount: 500
   stratifiedDivisions: 0
   density: 700
   viscosity: 1

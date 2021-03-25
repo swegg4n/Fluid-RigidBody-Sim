@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Build_test_01
   m_EditorClassIdentifier: 
   testLength: 1000
-  typeOfTest: 1
+  typeOfTest: 0
   prefab: {fileID: 1259726916372167871, guid: a900679e569a66b42a2bc7ac0a181733, type: 3}
   position: {x: 0, y: 0, z: 0}
   sampleCount: 100

@@ -59,12 +59,16 @@ public class Benchmarking : MonoBehaviour
             {
                 "Test length:  " + testLength.ToString(),
                 "Type of test:  " + typeOfTest,
+                "CPU: " + SystemInfo.processorType + " (" + SystemInfo.processorFrequency + ")",
+                "",
                 "Prefab name:  " + prefabName,
                 "Sample count:  " + sampleCount,
                 "Stratified divisions:  " + stratifiedDivisions,
+                "",
                 "Amplitude:  " + amplitude,
                 "Ordinary frequency  " + ordinaryFrequency,
                 "Angular frequency  " + angluarFrequency,
+                "",
             };
             return result;
         }
@@ -76,16 +80,17 @@ public class Benchmarking : MonoBehaviour
         public PerformanceTestResult(TestCase testCase) : base(testCase)
         {
             this.fps = new float[testCase.testLength];
+            this.memoryUsage = new long[testCase.testLength];
         }
 
         public float[] fps;
-        //memory
-        //...
+        public long[] memoryUsage;
 
 
         public override void SaveFrame(int frame)
         {
             this.fps[frame] = BenchmarkHelper.GetFPS();
+            this.memoryUsage[frame] = BenchmarkHelper.GetMemoryUsage();
         }
 
         public override List<string> ToString()
@@ -93,6 +98,7 @@ public class Benchmarking : MonoBehaviour
             List<string> result = base.ToString();
 
             result.Add("Avg. FPS:  " + BenchmarkHelper.AverageValue(fps).ToString());
+            result.Add("Avg. Memory usage:  " + BenchmarkHelper.AverageValue(memoryUsage).ToString() + " bytes");
 
             return result;
         }
@@ -106,7 +112,6 @@ public class Benchmarking : MonoBehaviour
         }
 
         public float[] correctness;
-        //...
 
 
         public override void SaveFrame(int frame)
