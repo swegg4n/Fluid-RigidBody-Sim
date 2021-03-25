@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Benchmarking : MonoBehaviour
 {
-    private string benchmarkPath = "F:/Programming/Fluid-RigidBody-Sim/Assets/Test_Results/";   //temp absolute path
+    private string benchmarkPath;
 
     [SerializeField] private TestCase[] testCases;
     [SerializeField] private GameObject waterInstance;
@@ -15,8 +15,11 @@ public class Benchmarking : MonoBehaviour
 
     private void Awake()
     {
-        //benchmarkPath = Application.dataPath + "/Test_Results/";
-
+        benchmarkPath = Application.dataPath + "/Test_Results/";
+#if !UNITY_EDITOR
+        if (!Directory.Exists(benchmarkPath))   //Creates the Test_Results folder for builds
+            Directory.CreateDirectory(benchmarkPath);
+#endif
         /*Change settings to fit benchmark test (eg. remove water, remove self collisions(?), change render settings(?))*/
         waterInstance.GetComponent<MeshRenderer>().enabled = false;
     }
@@ -39,6 +42,13 @@ public class Benchmarking : MonoBehaviour
             while (testComplete == false) { yield return new WaitForSeconds(1.0f); }  //spin wait
         }
 
+        Debug.Log("End of test, closing...");
+        yield return new WaitForSeconds(2.0f);
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 
 
@@ -52,19 +62,26 @@ public class Benchmarking : MonoBehaviour
         GameObject boatInstance = Instantiate(testCase.prefab, testCase.position, Quaternion.identity);
         boatInstance.GetComponent<BoatRigidbody>().Set(testCase.sampleCount, testCase.stratifiedDivisions, testCase.density, testCase.viscosity);
 
+        string testName = testCase.name;
+#if UNITY_EDITOR
+        testName += "_EDITOR"; //Prefixes the file name so we can differentiate between the tests
+#else
+        testName += "_BUILD";
+#endif
+
         yield return new WaitForSeconds(Time.deltaTime);    //Delay to not have instantiation manipulate test results. (instantiate is computationally heavy)
 
-        using (StreamWriter writer = new StreamWriter(benchmarkPath + testCase.name + ".txt"))
+        using (StreamWriter writer = new StreamWriter(benchmarkPath + testName + ".txt"))
         {
             float[] fps = new float[testCase.testLength];
 
-            Debug.Log($"Running benchmark: {testCase.name}");
+            Debug.Log($"Running benchmark: {testName}");
 
             int framesCounter = 0;
             while (framesCounter < testCase.testLength)
             {
                 if (framesCounter % 100 == 0)
-                    Debug.Log($"{testCase.name}:  {(framesCounter * 100) / testCase.testLength}%");
+                    Debug.Log($"{testName}:  {(framesCounter * 100) / testCase.testLength}%");
 
                 /*Save relevant data per frame*/
                 fps[framesCounter] = GetFPS();
@@ -75,12 +92,12 @@ public class Benchmarking : MonoBehaviour
             }
 
             /*Debug test results*/
-            Debug.Log($"Benchmark \"{testCase.name}\" - Completed");
+            Debug.Log($"Benchmark \"{testName}\" - Completed");
             Debug.Log($"Test length:  {testCase.testLength} frames");
             Debug.Log($"Average FPS:  {GetAverageFPS(fps, testCase.testLength)}");
 
             /*Compile test results to file*/
-            writer.WriteLine($"{testCase.name}");
+            writer.WriteLine($"{testName}");
             writer.WriteLine($"{testCase.testLength}");
             writer.WriteLine($"{GetAverageFPS(fps, testCase.testLength)}");
         }
