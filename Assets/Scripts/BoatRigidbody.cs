@@ -8,7 +8,7 @@ using UnityEditor;
 public class BoatRigidbody : MonoBehaviour
 {
     [SerializeField] private int sampleCount = 100;
-    [SerializeField] private int stratifiedDivisions = 0;
+    //[SerializeField] private int stratifiedDivisions = 0;
     [SerializeField] private float density = 997.0f;
     [SerializeField] private float viscosity = 1.0f;
 
@@ -67,7 +67,7 @@ public class BoatRigidbody : MonoBehaviour
         rb.drag = 0.0f;
         rb.angularDrag = 0.0f;
 
-        meshSampler = new MeshSampler(meshRenderers, transforms, DistributeSamples(boundsVolumes, totalBoundsVolume), stratifiedDivisions);
+        meshSampler = new MeshSampler(meshRenderers, transforms, DistributeSamples(boundsVolumes, totalBoundsVolume)/*, stratifiedDivisions*/);
         gravity = new Gravity(rb, meshSampler);
         buoyancy = new Buoyancy(rb, meshSampler, totalMeshVolume);
         waterDrag = new WaterDrag(rb, meshSampler, viscosity);
@@ -76,10 +76,10 @@ public class BoatRigidbody : MonoBehaviour
     }
 
 
-    public void Set(int sampleCount, int stratifiedDivisions, float density, float viscosity)
+    public void Set(int sampleCount, /*int stratifiedDivisions,*/ float density, float viscosity)
     {
         this.sampleCount = sampleCount;
-        this.stratifiedDivisions = stratifiedDivisions;
+        //this.stratifiedDivisions = stratifiedDivisions;
         this.density = density;
         this.viscosity = viscosity;
 
@@ -114,7 +114,6 @@ public class BoatRigidbody : MonoBehaviour
         buoyancy.Update();
         waterDrag.Update();
     }
-
 
 
     private void OnDrawGizmos()

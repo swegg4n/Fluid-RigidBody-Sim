@@ -67,22 +67,24 @@ public class MeshSampler
 
 
 
-    public MeshSampler(MeshRenderer[] meshRenderers, Transform[] linkedTransforms, int[] sampleCount_distribution, int stratifiedDivisions)
+    public MeshSampler(MeshRenderer[] meshRenderers, Transform[] linkedTransforms, int[] sampleCount_distribution/*, int stratifiedDivisions*/)
     {
         this.meshRenderers = meshRenderers;
 
         MeshApproximation = new MeshApproximation(sampleCount_distribution);
 
-        SampleMesh(sampleCount_distribution, linkedTransforms, stratifiedDivisions);
+        SampleMesh(sampleCount_distribution, linkedTransforms/*, stratifiedDivisions*/);
     }
 
-    private void SampleMesh(int[] sampleCount_distribution, Transform[] linkedTransforms, int stratifiedDivisions)
+    private void SampleMesh(int[] sampleCount_distribution, Transform[] linkedTransforms/*, int stratifiedDivisions*/)
     {
         int counter = 0;
         for (int i = 0; i < sampleCount_distribution.Length; i++)
         {
             MeshCollider collider = linkedTransforms[i].GetComponent<MeshCollider>();
             if (collider) collider.convex = false;
+
+            int stratifiedDivisions = Mathf.Max((int)Mathf.Pow(sampleCount_distribution[i], 1.0f / 3) - 1, 0);
 
             BoundingBox bounds = new BoundingBox(meshRenderers[i].bounds.center, meshRenderers[i].bounds.size);
             BoundingBox[] bounds_stratified = GenerateStratifiedBounds(bounds, stratifiedDivisions);

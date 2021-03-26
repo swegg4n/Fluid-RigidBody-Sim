@@ -17,6 +17,10 @@ public static class BenchmarkHelper
     }
 
 
+    public static float GetComputeTimeMS()
+    {
+        return Time.deltaTime * 1000;
+    }
     public static float GetFPS()
     {
         return 1.0f / Time.deltaTime;

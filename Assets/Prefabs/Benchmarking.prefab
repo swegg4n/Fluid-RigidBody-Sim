@@ -45,8 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   testCases:
-  - {fileID: 11400000, guid: b30aa1aab40fb0945bb75dfe7870931f, type: 2}
-  - {fileID: 11400000, guid: fa4b77fc828cb1149960ac28a77c00b5, type: 2}
+  - {fileID: 11400000, guid: c1e0aa8447aee0647bdb8f8b78da6f9e, type: 2}
   waterInstance: {fileID: 0}
 --- !u!114 &6136219724540910039
 MonoBehaviour:

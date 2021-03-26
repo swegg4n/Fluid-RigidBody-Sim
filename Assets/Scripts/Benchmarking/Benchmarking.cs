@@ -17,19 +17,18 @@ public class Benchmarking : MonoBehaviour
 
     private bool testComplete = false;
 
-    TestResult testResult;
+    private TestResult testResult;
 
 
     private abstract class TestResult
     {
-        public TestResult(TestCase testCase)
+        public TestResult(TestCase testCase, int samples)
         {
             this.testLength = testCase.testLength;
             this.typeOfTest = testCase.typeOfTest.ToString();
             this.prefabName = testCase.prefab.name;
 
-            this.sampleCount = testCase.sampleCount;
-            this.stratifiedDivisions = testCase.stratifiedDivisions;
+            this.sampleCount = samples;
             this.density = testCase.density;
             this.viscosity = testCase.viscosity;
 
@@ -55,7 +54,7 @@ public class Benchmarking : MonoBehaviour
         public abstract void SaveFrame(int frame);
 
 
-        public virtual new List<string> ToString()
+        public virtual List<string> Header()
         {
             List<string> result = new List<string>()
             {
@@ -74,12 +73,14 @@ public class Benchmarking : MonoBehaviour
             };
             return result;
         }
+
+        public abstract string Data();
     };
 
 
     private class PerformanceTestResult : TestResult
     {
-        public PerformanceTestResult(TestCase testCase) : base(testCase)
+        public PerformanceTestResult(TestCase testCase, int samples) : base(testCase, samples)
         {
             this.fps = new float[testCase.testLength];
             this.memoryUsage = new long[testCase.testLength];
@@ -95,20 +96,24 @@ public class Benchmarking : MonoBehaviour
             this.memoryUsage[frame] = BenchmarkHelper.GetMemoryUsage();
         }
 
-        public override List<string> ToString()
+        public override List<string> Header()
         {
-            List<string> result = base.ToString();
+            List<string> result = base.Header();
 
-            result.Add("Avg. FPS:  " + BenchmarkHelper.AverageValue(fps).ToString());
-            result.Add("Avg. Memory usage:  " + BenchmarkHelper.AverageValue(memoryUsage).ToString() + " bytes");
+            result.Add("Avg. FPS,       Avg. Memory usage (bytes)");
 
             return result;
+        }
+
+        public override string Data()
+        {
+            return BenchmarkHelper.AverageValue(fps).ToString() + "    " + BenchmarkHelper.AverageValue(memoryUsage).ToString();
         }
     };
 
     private class CorrectnessTestResult : TestResult
     {
-        public CorrectnessTestResult(TestCase testCase) : base(testCase)
+        public CorrectnessTestResult(TestCase testCase, int samples) : base(testCase, samples)
         {
             this.correctness = new float[testCase.testLength];
         }
@@ -121,13 +126,18 @@ public class Benchmarking : MonoBehaviour
             this.correctness[frame] = BenchmarkHelper.CalculateCorrectness(Benchmarking.boatInstance.transform, Benchmarking.referenceBoatInstance.transform);
         }
 
-        public override List<string> ToString()
+        public override List<string> Header()
         {
-            List<string> result = base.ToString();
+            List<string> result = base.Header();
 
-            result.Add("Avg. correctness:  " + BenchmarkHelper.AverageValue(correctness).ToString());
+            result.Add("Avg. correctness");
 
             return result;
+        }
+
+        public override string Data()
+        {
+            return BenchmarkHelper.AverageValue(correctness).ToString();
         }
     };
 
@@ -136,8 +146,8 @@ public class Benchmarking : MonoBehaviour
     private void Awake()
     {
         benchmarkPath = Application.dataPath + "/Test_Results/";
-#if !UNITY_EDITOR
-        if (!Directory.Exists(benchmarkPath))   //Creates the Test_Results folder for builds
+#if !UNITY_EDITOR       //Creates the Test_Results folder for builds
+        if (!Directory.Exists(benchmarkPath))   
             Directory.CreateDirectory(benchmarkPath);
 #endif
         /*Change settings to fit benchmark test (eg. remove water, change render settings(?))*/
@@ -155,10 +165,34 @@ public class Benchmarking : MonoBehaviour
     {
         for (int i = 0; i < testCases.Length; i++)
         {
-            testComplete = false;
-            StartCoroutine(RunBenchmark(testCases[i]));
+            string testName = testCases[i].name;
+#if UNITY_EDITOR
+            testName += "-EDITOR"; //Prefixes the file name so we can differentiate between the tests
+#else
+        testName += "-BUILD";
+#endif
+            switch (testCases[i].typeOfTest)
+            {
+                case TypeOfTest.Performance:
+                    testResult = new PerformanceTestResult(testCases[i], testCases[i].sampleCounts.Length);
+                    break;
 
-            while (testComplete == false) { yield return new WaitForSeconds(1.0f); }  //spin wait
+                case TypeOfTest.Correctness:
+                    testResult = new CorrectnessTestResult(testCases[i], testCases[i].sampleCounts.Length);
+                    break;
+            }
+
+            string filePath = benchmarkPath + testName + ".txt";
+            File.Create(filePath);
+            testResult.Header().ForEach(x => File.WriteAllText(filePath, x));
+
+            for (int j = 0; j < testCases[i].sampleCounts.Length; j++)
+            {
+                testComplete = false;
+                StartCoroutine(RunBenchmark(testCases[i], testCases[i].sampleCounts[j], filePath));
+
+                while (testComplete == false) { yield return new WaitForSeconds(1.0f); }  //spin wait
+            }
         }
 
         Debug.Log("End of test, closing...");
@@ -172,18 +206,8 @@ public class Benchmarking : MonoBehaviour
 
 
 
-    private IEnumerator RunBenchmark(TestCase testCase)
+    private IEnumerator RunBenchmark(TestCase testCase, int samples, string filePath)
     {
-        switch (testCase.typeOfTest)
-        {
-            case TypeOfTest.Performance:
-                testResult = new PerformanceTestResult(testCase);
-                break;
-
-            case TypeOfTest.Correctness:
-                testResult = new CorrectnessTestResult(testCase);
-                break;
-        }
 
         /*Set the wave manager settings according to the test case*/
         this.waterInstance.GetComponent<WaveManager>().Set(testCase.amplitude, testCase.ordinaryFrequency, testCase.angluarFrequency);
@@ -191,12 +215,12 @@ public class Benchmarking : MonoBehaviour
 
         /*Instantiate a new boat to test with*/
         boatInstance = Instantiate(testCase.prefab, testCase.position, Quaternion.identity);
-        boatInstance.GetComponent<BoatRigidbody>().Set(testCase.sampleCount, testCase.stratifiedDivisions, testCase.density, testCase.viscosity);
+        boatInstance.GetComponent<BoatRigidbody>().Set(samples/*, testCase.stratifiedDivisions*/, testCase.density, testCase.viscosity);
 
         if (testCase.typeOfTest == TypeOfTest.Correctness)  //If we aim to test correctness => instantiate one more boat with high sample count, to test against.
         {
             referenceBoatInstance = Instantiate(testCase.prefab, testCase.position, Quaternion.identity);
-            referenceBoatInstance.GetComponent<BoatRigidbody>().Set(REFERENCE_BOAT_SAMPLES, testCase.stratifiedDivisions, testCase.density, testCase.viscosity);
+            referenceBoatInstance.GetComponent<BoatRigidbody>().Set(REFERENCE_BOAT_SAMPLES/*, testCase.stratifiedDivisions*/, testCase.density, testCase.viscosity);
 
             referenceBoatInstance.layer = 6;     //Set layer to "Reference", non-colliding layer
             for (int i = 0; i < referenceBoatInstance.transform.childCount; i++)
@@ -204,43 +228,30 @@ public class Benchmarking : MonoBehaviour
         }
 
 
-        string testName = testCase.name;
-#if UNITY_EDITOR
-        testName += "_EDITOR"; //Prefixes the file name so we can differentiate between the tests
-#else
-        testName += "_BUILD";
-#endif
-
         yield return new WaitForSeconds(Time.deltaTime);    //Delay to not have instantiation manipulate test results. (instantiate is computationally heavy)
 
 
-        using (StreamWriter writer = new StreamWriter(benchmarkPath + testName + ".txt"))
+        using (StreamWriter writer = File.AppendText(filePath))
         {
-            Debug.Log($"Running benchmark: {testName}");
+            Debug.Log($"Running benchmark: {testCase.name}_s{samples}");
 
             int framesCounter = 0;
             while (framesCounter < testCase.testLength)
             {
                 if (framesCounter % 10 == 0)
-                    Debug.Log($"{testName}:  {(framesCounter * 100) / testCase.testLength}%");  //DEBUG progress
-
+                    Debug.Log($"{testCase.name}:  {(framesCounter * 100) / testCase.testLength}%");  //DEBUG progress
 
                 testResult.SaveFrame(framesCounter);    //Update the test result values with data from this frame
-
 
                 yield return new WaitForSeconds(Time.deltaTime);    // Wait for next frame
                 ++framesCounter;
             }
 
-
             #region Write/Log results
-            Debug.Log($"Benchmark \"{testName}\" - Completed");
+            Debug.Log($"Benchmark \"{testCase.name}_s{samples}\" - Completed");
 
-            foreach (string result in testResult.ToString())
-            {
-                writer.WriteLine(result);
-                Debug.Log(result);
-            }
+            writer.WriteLine(testResult.Data());
+            Debug.Log(testResult.Data());
             #endregion
         }
 
