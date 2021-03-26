@@ -100,7 +100,7 @@ public class Benchmarking : MonoBehaviour
         {
             List<string> result = base.Header();
 
-            result.Add("Avg. FPS,       Avg. Memory usage (bytes)");
+            result.Add("\nAvg. FPS    Avg. Memory usage (bytes)");
 
             return result;
         }
@@ -183,8 +183,14 @@ public class Benchmarking : MonoBehaviour
             }
 
             string filePath = benchmarkPath + testName + ".txt";
-            File.Create(filePath);
-            testResult.Header().ForEach(x => File.WriteAllText(filePath, x));
+            using (StreamWriter writer = new StreamWriter(filePath))
+            {
+                for (int j = 0; j < testResult.Header().Count; j++)
+                {
+                    writer.WriteLine(testResult.Header()[j]);
+                }
+            }
+
 
             for (int j = 0; j < testCases[i].sampleCounts.Length; j++)
             {
