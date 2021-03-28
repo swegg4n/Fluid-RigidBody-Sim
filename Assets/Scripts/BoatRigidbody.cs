@@ -8,7 +8,6 @@ using UnityEditor;
 public class BoatRigidbody : MonoBehaviour
 {
     [SerializeField] private int sampleCount = 100;
-    //[SerializeField] private int stratifiedDivisions = 0;
     [SerializeField] private float density = 997.0f;
     [SerializeField] private float viscosity = 1.0f;
 
@@ -21,6 +20,12 @@ public class BoatRigidbody : MonoBehaviour
     WaterDrag waterDrag;
 
 
+#if UNITY_EDITOR
+    private void OnEnable()
+    {
+        Initialize();
+    }
+#endif
 
     public void Initialize()
     {
@@ -76,10 +81,9 @@ public class BoatRigidbody : MonoBehaviour
     }
 
 
-    public void Set(int sampleCount, /*int stratifiedDivisions,*/ float density, float viscosity)
+    public void Set(int sampleCount, float density, float viscosity)
     {
         this.sampleCount = sampleCount;
-        //this.stratifiedDivisions = stratifiedDivisions;
         this.density = density;
         this.viscosity = viscosity;
 

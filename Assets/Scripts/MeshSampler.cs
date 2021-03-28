@@ -153,19 +153,22 @@ public class MeshSampler
     public void DebugDraw()
     {
         Gizmos.color = Color.white;
-        foreach (SamplePoint sp in MeshApproximation.Samples)
+        for (int i = 0; i < MeshApproximation.SampleCount; i++)
         {
-            Gizmos.DrawWireSphere(sp.GlobalPosition, Gizmos.probeSize);
-        }
-
-        Gizmos.color = Color.green;
-        foreach (BoundingBox[] b_arr in bounds_stratified)
-        {
-            foreach (BoundingBox b in b_arr)
+            if (MeshApproximation.IsUnderWater[i] == 0)
             {
-                Gizmos.DrawWireCube(b.Center, b.Size);
+                Gizmos.DrawSphere(MeshApproximation.Samples[i].GlobalPosition, Gizmos.probeSize);
             }
         }
+
+        //Gizmos.color = Color.green;
+        //foreach (BoundingBox[] b_arr in bounds_stratified)
+        //{
+        //    foreach (BoundingBox b in b_arr)
+        //    {
+        //        Gizmos.DrawWireCube(b.Center, b.Size);
+        //    }
+        //}
     }
 
 }

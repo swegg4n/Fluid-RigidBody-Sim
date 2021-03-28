@@ -32,12 +32,23 @@ public static class BenchmarkHelper
     }
 
 
-    public static float CalculateCorrectness(Transform original, Transform reference)
+    public static float PositionCorrectness(Transform original, Transform reference)
     {
-        float diff_pos_absolute = Vector3.Distance(reference.position, original.position);
+        float diff_pos = Vector3.Distance(reference.position, original.position);
+
+        //Debug.Log("Positional incorrectness:  " + diff_pos);
+
+        return diff_pos;
+    }
+
+
+    public static float RotationCorrectness(Transform original, Transform reference)
+    {
         float diff_rot = Mathf.Abs(Quaternion.Angle(reference.rotation, original.rotation));
 
-        return -(diff_pos_absolute + diff_rot);
+        //Debug.Log("Rotational correctness:  " + diff_rot);
+
+        return diff_rot;
     }
 
 }

@@ -118,6 +118,9 @@ namespace UnityTemplateProjects
 
         void OnEnable()
         {
+#if !UNITY_EDITOR
+            gameObject.SetActive(false);
+#endif
             m_TargetCameraState.SetFromTransform(transform);
             m_InterpolatingCameraState.SetFromTransform(transform);
         }
@@ -166,9 +169,9 @@ namespace UnityTemplateProjects
             if (IsEscapePressed())
             {
                 Application.Quit();
-				#if UNITY_EDITOR
+#if UNITY_EDITOR
 				UnityEditor.EditorApplication.isPlaying = false; 
-				#endif
+#endif
             }
 
             // Hide and lock cursor when right mouse button pressed

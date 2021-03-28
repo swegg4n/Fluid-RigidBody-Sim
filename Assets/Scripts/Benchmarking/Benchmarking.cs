@@ -7,7 +7,7 @@ public class Benchmarking : MonoBehaviour
 {
     private string benchmarkPath;
 
-    private const int REFERENCE_BOAT_SAMPLES = 10000;
+    private const int REFERENCE_BOAT_SAMPLES = 20000;
 
     [SerializeField] private TestCase[] testCases;
     [SerializeField] private GameObject waterInstance;
@@ -100,14 +100,14 @@ public class Benchmarking : MonoBehaviour
         {
             List<string> result = base.Header();
 
-            result.Add("\nAvg. FPS    Avg. Memory usage (bytes)");
+            result.Add("\nAvg. FPS\tAvg. Memory usage (bytes)");
 
             return result;
         }
 
         public override string Data()
         {
-            return BenchmarkHelper.AverageValue(fps).ToString() + "    " + BenchmarkHelper.AverageValue(memoryUsage).ToString();
+            return BenchmarkHelper.AverageValue(fps).ToString() + "\t" + BenchmarkHelper.AverageValue(memoryUsage).ToString();
         }
     };
 
@@ -115,29 +115,31 @@ public class Benchmarking : MonoBehaviour
     {
         public CorrectnessTestResult(TestCase testCase, int samples) : base(testCase, samples)
         {
-            this.correctness = new float[testCase.testLength];
+            this.correctness_pos = new float[testCase.testLength];
+            this.correctness_rot = new float[testCase.testLength];
         }
 
-        public float[] correctness;
-
+        public float[] correctness_pos;
+        public float[] correctness_rot;
 
         public override void SaveFrame(int frame)
         {
-            this.correctness[frame] = BenchmarkHelper.CalculateCorrectness(Benchmarking.boatInstance.transform, Benchmarking.referenceBoatInstance.transform);
+            this.correctness_pos[frame] = BenchmarkHelper.PositionCorrectness(Benchmarking.boatInstance.transform, Benchmarking.referenceBoatInstance.transform);
+            this.correctness_rot[frame] = BenchmarkHelper.RotationCorrectness(Benchmarking.boatInstance.transform, Benchmarking.referenceBoatInstance.transform);
         }
 
         public override List<string> Header()
         {
             List<string> result = base.Header();
 
-            result.Add("Avg. correctness");
+            result.Add("Positional correctness\tAngular correctness");
 
             return result;
         }
 
         public override string Data()
         {
-            return BenchmarkHelper.AverageValue(correctness).ToString();
+            return BenchmarkHelper.AverageValue(correctness_pos).ToString() + "\t" + BenchmarkHelper.AverageValue(correctness_rot).ToString();
         }
     };
 
@@ -157,7 +159,9 @@ public class Benchmarking : MonoBehaviour
 
     private void Start()
     {
+#if !UNITY_EDITOR
         StartCoroutine(RunAllBenchmarks());
+#endif
     }
 
 
@@ -245,7 +249,7 @@ public class Benchmarking : MonoBehaviour
             while (framesCounter < testCase.testLength)
             {
                 if (framesCounter % 10 == 0)
-                    Debug.Log($"{testCase.name}:  {(framesCounter * 100) / testCase.testLength}%");  //DEBUG progress
+                    Debug.Log($"Progress:  {(framesCounter * 100) / testCase.testLength}%");  //DEBUG progress
 
                 testResult.SaveFrame(framesCounter);    //Update the test result values with data from this frame
 
@@ -253,12 +257,12 @@ public class Benchmarking : MonoBehaviour
                 ++framesCounter;
             }
 
-            #region Write/Log results
+#region Write/Log results
             Debug.Log($"Benchmark \"{testCase.name}_s{samples}\" - Completed");
 
             writer.WriteLine(testResult.Data());
             Debug.Log(testResult.Data());
-            #endregion
+#endregion
         }
 
         Destroy(boatInstance);

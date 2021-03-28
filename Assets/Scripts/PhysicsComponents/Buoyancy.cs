@@ -1,8 +1,5 @@
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using static Density_enum;
-
 
 public class Buoyancy : IPhysicsComponent
 {
@@ -29,7 +26,7 @@ public class Buoyancy : IPhysicsComponent
             float underWaterRatio = underWaterSamples / ms.MeshApproximation.SampleCount;
             float approxUnderwaterVolume = meshVolume * underWaterRatio;
 
-            Vector3 buoyantForce = -(int)Material_Density.Water * Physics.gravity * approxUnderwaterVolume;
+            Vector3 buoyantForce = -997 * Physics.gravity * approxUnderwaterVolume; //997 kg/m^3 is the density of water
             rb.AddForceAtPosition(buoyantForce, ms.MeshApproximation.AverageUnderWaterSamplePosition());
         }
     }
